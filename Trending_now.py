@@ -37,8 +37,27 @@ def scrape_gtrends_with_pagination(url: str, headless: bool = True):
         previous_html = None
 
         while True:
-            driver.sleep(4) # Várjunk, hogy a dinamikus grafikák/sparkline-ok betöltődjenek
-            # html = driver.page_source
+            # Görgetés és várakozás, hogy a sparkline-ok biztosan renderelődjenek lassabb / CI szervereken is
+            driver.execute_script("window.scrollTo(0, document.body.scrollHeight / 2);")
+            driver.sleep(1)
+            driver.execute_script("window.scrollTo(0, 0);")
+            driver.sleep(2)
+
+            # Várakozás, hogy a polyline-ok points attribútumai kitöltődjenek (max 10 mp)
+            for _ in range(10):
+                has_points = driver.execute_script("""
+                    const polylines = document.querySelectorAll('polyline');
+                    for (let p of polylines) {
+                        if (p.getAttribute('points') && p.getAttribute('points').trim() !== '') {
+                            return true;
+                        }
+                    }
+                    return false;
+                """)
+                if has_points:
+                    break
+                driver.sleep(1)
+
             html = driver.execute_script("return document.documentElement.outerHTML;")
 
             # Ellenőrzés: ha az oldal tartalma megegyezik az előzővel, megállunk
