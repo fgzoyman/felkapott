@@ -37,6 +37,7 @@ def scrape_gtrends_with_pagination(url: str, headless: bool = True):
         previous_html = None
 
         while True:
+            driver.sleep(4) # Várjunk, hogy a dinamikus grafikák/sparkline-ok betöltődjenek
             # html = driver.page_source
             html = driver.execute_script("return document.documentElement.outerHTML;")
 
