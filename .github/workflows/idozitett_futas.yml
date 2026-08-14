@@ -1,0 +1,30 @@
+name: Idozitett Python Futtatas
+
+on:
+  schedule:
+    # Cron formátum: perc óra nap hónap a_hét_napja
+    # Ez a példa minden nap reggel 8:00 órakor fut le (UTC idő szerint!)
+    - cron: '8 */2 * * *'
+  workflow_dispatch: # Ez a gombot adja meg, hogy manuálisan is el tudd indítani bármikor testingre
+
+jobs:
+  run-python-script:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Kod letoltese a repobol
+      uses: actions/checkout@v4
+
+    - name: Python kornyezet beallitasa
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12' # Itt megadhatod a használt Python verziódat
+
+    - name: Szukseges csomagok telepitese (opcionalis)
+      run: |
+        python -m pip install --upgrade pip
+        # Ha vannak külső csomagjaid (pl. pandas, requests), ide írd őket:
+        # pip install seleniumbase datetime
+
+    - name: A Python script futtatasa
+      run: python Trending_now.py # Írd át a saját Python fájlod nevére!
