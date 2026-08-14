@@ -37,7 +37,8 @@ def scrape_gtrends_with_pagination(url: str, headless: bool = True):
         previous_html = None
 
         while True:
-            html = driver.page_source
+            # html = driver.page_source
+            html = driver.execute_script("return document.documentElement.outerHTML;")
 
             # Ellenőrzés: ha az oldal tartalma megegyezik az előzővel, megállunk
             if previous_html is not None and html == previous_html:
