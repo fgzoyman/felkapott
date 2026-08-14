@@ -13,10 +13,10 @@ jobs:
 
     steps:
     - name: Kod letoltese a repobol
-      uses: actions/checkout@v4
+      uses: actions/checkout@v4.2.2
 
     - name: Python kornyezet beallitasa
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v5.4.0
       with:
         python-version: '3.12' # Itt megadhatod a használt Python verziódat
 
