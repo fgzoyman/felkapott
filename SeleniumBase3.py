@@ -54,8 +54,8 @@ def scrape_gtrends_with_pagination(url: str, headless: bool = True):
 
             # Lapozás a következő oldalra
             try:
-                # Keresés a pontos magyar aria-label alapján: "Ugrás a következő oldalra"
-                next_btn = driver.find_element("xpath", "//button[@aria-label='Ugrás a következő oldalra' or contains(@aria-label, 'következő oldal')]")
+                # Keresés contains feltételekkel (magyar és angol)
+                next_btn = driver.find_element("xpath", "//button[contains(@aria-label, 'következő oldal') or contains(@aria-label, 'next page')]")
 
                 driver.execute_script("arguments[0].scrollIntoView(true);", next_btn)
                 driver.sleep(1)
@@ -63,8 +63,8 @@ def scrape_gtrends_with_pagination(url: str, headless: bool = True):
                 driver.sleep(3) # Várás az új tartalom betöltődésére
                 
                 page_index += 1
-            except Exception as e:
-                print(f"Hiba történt a lapozás során: {e}")
+            except Exception:
+                print("Elértük az utolsó oldalt (nincs több következő gomb).")
                 break
 
     finally:

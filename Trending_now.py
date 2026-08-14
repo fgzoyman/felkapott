@@ -54,8 +54,8 @@ def scrape_gtrends_with_pagination(url: str, headless: bool = True):
 
             # Lapozás a következő oldalra
             try:
-                # Keresés a pontos magyar aria-label alapján: "Ugrás a következő oldalra"
-                next_btn = driver.find_element("xpath", "//button[@aria-label='Ugrás a következő oldalra' or contains(@aria-label, 'következő oldal')]")
+                # Keresés magyar és angol aria-label alapján
+                next_btn = driver.find_element("xpath", "//button[contains(@aria-label, 'következő oldal') or contains(@aria-label, 'next page')]")
 
                 driver.execute_script("arguments[0].scrollIntoView(true);", next_btn)
                 driver.sleep(1)
