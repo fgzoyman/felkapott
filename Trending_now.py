@@ -3,12 +3,20 @@
 Íme a Python függvény a SeleniumBase Undetected Chromedriver használatával és lapozással:
 """
 from datetime import datetime
+import subprocess
+import sys
 from seleniumbase import Driver
 
 def scrape_gtrends_with_pagination(url: str, headless: bool = True):
     """
-    Letölti a Google Trends weboldal összes oldalát 50-es nézetben, lapozva.
+    Letölti a Google Trends weboldal összes oldalát, lapozva.
     """
+    # Automatikus Chromedriver ellenőrzés és illesztés a Chrome verzióhoz
+    try:
+        subprocess.run([sys.executable, "-m", "seleniumbase", "get", "chromedriver", "latest"], check=True)
+    except Exception as e:
+        print(f"Nem sikerült frissíteni a Chromedriver-t: {e}")
+
     driver = Driver(uc=True, headless=headless)
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     
@@ -18,29 +26,20 @@ def scrape_gtrends_with_pagination(url: str, headless: bool = True):
         driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
         driver.sleep(2)
     
-        try:
-            # Kattintás a "Rows per page" / "Oldalankénti sorszám" legördülő menüre (25 -> 50)
-            dropdown = driver.find_element("xpath", "//*[contains(text(), '25')]")
-            driver.execute_script("arguments[0].scrollIntoView(true);", dropdown)
-            driver.sleep(1)
-            driver.execute_script("arguments[0].click();", dropdown)
-            driver.sleep(1)
-
-            # Kiválasztjuk az 50-es értéket a lenyíló menüből JS kattintással
-            option_50 = driver.find_element("xpath", "//div[@role='option']//*[contains(text(), '50')] | //*[text()='50']")
-            driver.execute_script("arguments[0].click();", option_50)
-            driver.sleep(2)
-        except Exception as e:
-            print(f"Nem sikerült átállítani az oldalszámot 50-re: {e}")
+        # Alapértelmezett 25-ös nézet megtartása, így ~74 sor esetén 3 oldal lesz (a, b, c)
+        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        driver.sleep(2)
 
         page_index = 0
         previous_html = None
 
         while True:
-            # Görgetés és várakozás, hogy a sparkline-ok biztosan renderelődjenek lassabb / CI szervereken is
+            # Végig kell görgetni az oldalon fel-le, hogy a lusta módon betöltődő (lazy-loaded) sparkline grafikonok renderelődjenek
+            driver.execute_script("window.scrollTo(0, 0);")
+            driver.sleep(1)
             driver.execute_script("window.scrollTo(0, document.body.scrollHeight / 2);")
             driver.sleep(1)
-            driver.execute_script("window.scrollTo(0, 0);")
+            driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
             driver.sleep(2)
 
             # Várakozás, hogy a polyline-ok points attribútumai kitöltődjenek (max 10 mp)
