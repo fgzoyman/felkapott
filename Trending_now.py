@@ -2,23 +2,28 @@
 + Thought: Formulating the Python Code · 69ms
 Íme a Python függvény a SeleniumBase Undetected Chromedriver használatával és lapozással:
 """
-from datetime import datetime
+
 import subprocess
 import sys
+from datetime import datetime
+from zoneinfo import ZoneInfo
+
 from seleniumbase import Driver
+
 
 def scrape_gtrends_with_pagination(url: str, headless: bool = True):
     """
     Letölti a Google Trends weboldal összes oldalát, lapozva.
     """
     # Automatikus Chromedriver ellenőrzés és illesztés a Chrome verzióhoz
+    ChromeUpdateException = None
     try:
         subprocess.run([sys.executable, "-m", "seleniumbase", "get", "chromedriver", "latest"], check=True)
-    except Exception as e:
+    except ChromeUpdateException as e:
         print(f"Nem sikerült frissíteni a Chromedriver-t: {e}")
 
     driver = Driver(uc=True, headless=headless)
-    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    timestamp = datetime.now(tz = ZoneInfo("Europe/Budapest")).strftime("%Y-%m-%d_%H-%M-%S")
     
     try:
         driver.get(url)
@@ -73,6 +78,7 @@ def scrape_gtrends_with_pagination(url: str, headless: bool = True):
             print(f"Mentve: {fajlnev}")
 
             # Lapozás a következő oldalra
+            PagingException = None
             try:
                 # Keresés magyar és angol aria-label alapján
                 next_btn = driver.find_element("xpath", "//button[contains(@aria-label, 'következő oldalra') or contains(@aria-label, 'next page')]")
@@ -83,7 +89,7 @@ def scrape_gtrends_with_pagination(url: str, headless: bool = True):
                 driver.sleep(3) # Várás az új tartalom betöltődésére
                 
                 page_index += 1
-            except Exception as e:
+            except PagingException as e:
                 print(f"Hiba történt a lapozás során: {e}")
                 break
 
